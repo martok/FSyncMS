@@ -23,7 +23,9 @@
 # Contributor(s):
 #   Daniel Triendl <daniel@pew.cc>
 #   balu
-# 
+#   Tobias Hollerung (tobias@hollerung.eu)
+#   Martin-Jan Sklorz (m.skl@lemsgbr.de)
+#
 # Alternatively, the contents of this file may be used under the terms of
 # either the GNU General Public License Version 2 or later (the "GPL"), or
 # the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
@@ -42,14 +44,13 @@
 // variables start
 // --------------------------------------------
 $action = null;
-$dbType = null;
+$db_type = null;
 
-$dbUser = null;
-$dbName = null;
-$dbPass = null;
-$dbHost = null;
-
-
+$db_user = null;
+$db_name = null;
+$db_pass = null;
+$db_host = null;
+$db_table_prefix = null;
 // --------------------------------------------
 // variables end
 // --------------------------------------------
@@ -58,30 +59,40 @@ $dbHost = null;
 // --------------------------------------------
 // post handling start
 // --------------------------------------------
-if ( isset( $_POST['action'] ) ) {
+if (isset($_POST['action']))
+{
     $action = check_input($_POST['action']);
 }
 
-if ( isset( $_POST['dbType'] ) ) {
-    $dbType = check_input($_POST['dbType']);
+if (isset($_POST['dbtype']))
+{
+    $db_type = check_input($_POST['dbtype']);
 }
 
-if ( isset( $_POST['dbhost'] ) ) {
-    $dbHost = check_input($_POST['dbhost']);
+if (isset($_POST['dbhost']))
+{
+    $db_host = check_input($_POST['dbhost']);
 }
 
-if ( isset( $_POST['dbname'] ) ) {
-    $dbName = check_input($_POST['dbname']);
+if (isset($_POST['dbname']))
+{
+    $db_name = check_input($_POST['dbname']);
 }
 
-if ( isset( $_POST['dbuser'] ) ) {
-    $dbUser = check_input($_POST['dbuser']);
+if (isset($_POST['dbuser']))
+{
+    $db_user = check_input($_POST['dbuser']);
 }
 
-if ( isset( $_POST['dbpass'] ) ) {
-    $dbPass = check_input($_POST['dbpass']);
+if (isset($_POST['dbpass']))
+{
+    $db_pass = check_input($_POST['dbpass']);
 }
 
+if (isset($_POST['dbtableprefix']))
+{
+    $db_table_prefix = check_input($_POST['dbtableprefix']);
+}
 // --------------------------------------------
 // post handling end
 // --------------------------------------------
@@ -94,7 +105,8 @@ if ( isset( $_POST['dbpass'] ) ) {
 /*
     ensure that the input is not total waste
 */
-function check_input( $data ) {
+function check_input( $data )
+{
     $data = trim($data);
     $data = stripslashes($data);
     $data = htmlspecialchars($data);
@@ -106,51 +118,49 @@ function check_input( $data ) {
     create the config file with the database type
     and the given connection credentials
 */
-function write_config_file($dbt, $dbh, $dbn, $dbu, $dbp, $fsRoot) {
+function write_config_file($db_type, $db_host, $db_name, $db_user, $db_pass, $fsRoot, $db_table_prefix)
+{
 
     // construct the name of config file
-    //
     $path = explode('/', $_SERVER['SCRIPT_FILENAME']);
     array_pop($path);
     array_push($path, 'settings.php');
     $cfg_file_name = implode('/', $path);
 
-    if ( file_exists($cfg_file_name) && filesize( $cfg_file_name ) > 0 ) {
-        echo "<hr>The config file $cfg_file_name is already present</hr>";
+    if (file_exists($cfg_file_name) && filesize( $cfg_file_name ) > 0)
+    {
+        echo '<h2>The configuration file "' . $cfg_file_name . '" is already present!</h2>';
         return;
     }
 
-    echo "Creating cfg file: " . $cfg_file_name;
+    echo 'Creating configuration file...<br/>';
 
-    // now build the content of the config file
-    //
+    // create content
     $cfg_content  = "<?php\n\n";
     $cfg_content .= "    // you can disable registration to the firefox sync server here,\n";
     $cfg_content .= "    // by setting ENABLE_REGISTER to false\n";
     $cfg_content .= "    // \n";
     $cfg_content .= "    define(\"ENABLE_REGISTER\", true);\n\n";
 
+    $cfg_content .= "    // enable / disable error logging\n";
+    $cfg_content .= "    define(\"LOG_THE_ERROR\", true);\n\n";
+
     $cfg_content .= "    // firefox sync server url, this should end with a /\n";
     $cfg_content .= "    // e.g. https://YourDomain.de/Folder_und_ggf_/index.php/\n";
     $cfg_content .= "    // \n";
-    $cfg_content .= "    define(\"FSYNCMS_ROOT\", \"$fsRoot\");\n\n";
+    $cfg_content .= "    define(\"FSYNCMS_ROOT\", \"" . $fsRoot . "\");\n\n";
 
-    $cfg_content .= "    // Database connection credentials\n";
+    $cfg_content .= "    // database system you want to use\n";
+    $cfg_content .= "    // e.g. MYSQL, PGSQL, SQLITE\n";
     $cfg_content .= "    // \n";
-    $cfg_content .= "    define(\"SQLITE_FILE\", \"weave_db\");\n";
-    if ( $dbt != "mysql" ) {
-        $cfg_content .= "    define(\"MYSQL_ENABLE\", false);\n";
-        $cfg_content .= "    define(\"MYSQL_HOST\", \"localhost\");\n";
-        $cfg_content .= "    define(\"MYSQL_DB\", \"fsync\");\n";
-        $cfg_content .= "    define(\"MYSQL_USER\", \"fsyncUserName\");\n";
-        $cfg_content .= "    define(\"MYSQL_PASSWORD\", \"fsyncUserPassword\");\n";
-    } else {
-        $cfg_content .= "    define(\"MYSQL_ENABLE\", true);\n";
-        $cfg_content .= "    define(\"MYSQL_HOST\", \"$dbh\");\n";
-        $cfg_content .= "    define(\"MYSQL_DB\", \"$dbn\");\n";
-        $cfg_content .= "    define(\"MYSQL_USER\", \"$dbu\");\n";
-        $cfg_content .= "    define(\"MYSQL_PASSWORD\", \"$dbp\");\n";
-    }
+    $cfg_content .= "    define(\"DATABASE_ENGINE\", \"" . strtoupper($db_type) . "\");\n";
+    $cfg_content .= "    \n";
+    $cfg_content .= "    define(\"DATABASE_HOST\", \"" . $db_host . "\");\n";
+    $cfg_content .= "    define(\"DATABASE_DB\", \"" . $db_name . "\");\n";
+    $cfg_content .= "    define(\"DATABASE_USER\", \"" . $db_user . "\");\n";
+    $cfg_content .= "    define(\"DATABASE_PASSWORD\", \"" . $db_pass . "\");\n";
+    $cfg_content .= "    \n";
+    $cfg_content .= "    define(\"DATABASE_TABLE_PREFIX\", \"" . $db_table_prefix . "\");\n";
     $cfg_content .= "\n";
     $cfg_content .= "    // Use bcrypt instead of MD5 for password hashing\n";
     $cfg_content .= "    define(\"BCRYPT\", true);\n";
@@ -158,242 +168,298 @@ function write_config_file($dbt, $dbh, $dbn, $dbu, $dbp, $fsRoot) {
 
     $cfg_content .= "\n?>\n";
 
-    // now write everything
-    //
-    $cfg_file = fopen($cfg_file_name, "a");
-    fputs($cfg_file, "$cfg_content");
-    fclose($cfg_file);
+    // write to disk
+    // @note: catch does not seem to work
+    try
+    {
+		$cfg_file = fopen($cfg_file_name, 'a');
+		fputs($cfg_file, $cfg_content);
+		fclose($cfg_file);
+	} catch (Exception $e) {
+		echo '<h2>Configuration file "' . $cfg_file_name . '" is not accessable!</h2><br/>
+			<h4>Create it manually:</h4><br/><hr>
+			<p>' . $cfg_content . '</p>';
+	}
 }
 
 
-/*
-    print the html header for the form
-*/
-function print_header( $title ) {
-    if ( ! isset( $title ) ) {
-        $title = "";
+function echo_header($title)
+{
+    if (!isset($title)) {
+        $title = '';
     }
-    print '<html><header><title>' . $title . '</title><body>
-    <h1>Setup FSyncMS</h1>
-    <form action="setup.php" method="post">';
+    echo '<!DOCTYPE html>
+		<html lang="en">
+    		<head>
+    			<title>' . $title . '</title>
+    		</head>
+    		
+    		<body>
+    			<h1>Setup FSyncMS</h1>';
+}
+function echo_form_header()
+{
+	echo '<form action="setup.php" method="post">';
+}
+function echo_form_footer()
+{
+	echo '</form>';
+}
+function echo_footer()
+{
+    echo '	</body>
+    	</html>';
 }
 
-
-/*
-    print the html footer
-*/
-function print_footer() {
-    print '</form></body></html>';
-}
-
-
-/*
-    print the html for for the mysql connection credentials
-*/
-function print_mysql_connection_form() {
-    print_header("MySQL database connection setup");
-    print 'MySQL database connection setup
-    <table>
-        <tr>
-            <td>Host</td>
-            <td><input type="text" name="dbhost" /></td>
-        </tr>
-        <tr>
-            <td>Instance name</td>
-            <td><input type="text" name="dbname" /></td>
-        </tr>
-        <tr>
-            <td>Username</td>
-            <td><input type="text" name="dbuser" /></td>
-        </tr>
-        <tr>
-            <td>Password</td>
-            <td><input type="password" name="dbpass" /></td>
-        </tr>
-    </table>
-
-    <input type="hidden" name="action" value="step2">
-    <input type="hidden" name="dbType" value="mysql">
-    <p><input type="submit" value="OK"></p>';
-    print_footer();
-}
 // --------------------------------------------
 // functions end
 // --------------------------------------------
 
-// check if we have no configuration at the moment
-//
-if ( file_exists("settings.php") && filesize( "settings.php" ) > 0 ) {
-    echo "<hr><h2>The setup looks like it's completed, please delete settings.php</h2><hr>";
-    exit;
-}
+
+	// check if we have no configuration at the moment
+	if (file_exists('settings.php') && filesize('settings.php') > 0 )
+	{
+		echo '<hr><h2>The setup looks completed, please finish it by deleting setup.php!</h2><hr>';
+		exit;
+	}
 
 
-// inital page - select the database type
-//
-if ( ! $action ) {
+	// step 1 - select the database engine
+	if (!$action)
+	{
+		// first check if we have pdo installed (untested)
+		if (!extension_loaded('PDO'))
+		{
+		    echo 'ERROR - PDO is missing in the php installation!';
+		    exit();
+		}
+		$valid_pdo_driver = 0;
 
-    // first check if we have pdo installed (untested)
-    //
-    if ( ! extension_loaded('PDO') ) {
-        print "ERROR - PDO is missing in the php installation!";
-        exit();
-    }
+		echo_header('Setup FSyncMS - DB engine selection');
 
-    $validPdoDriver = 0;
+		echo '<p>Which database type should be used?</p><br/>';
 
-    print_header("Setup FSyncMS - DB Selection");
+		echo_form_header();
 
-    print 'Which database type should be used?<br>';
-    if ( extension_loaded('pdo_mysql') ) {
-        print '<input type="radio" name="dbType" value="mysql" /> MySQL <br>';
-        $validPdoDriver++;
-    } else {
-        print 'MySQL not possible (Driver missing) <br>';
-    }
+		// SQLite
+		if (extension_loaded('pdo_sqlite'))
+		{
+		    echo '<input type="radio" name="dbtype" value="sqlite" checked="checked" /> SQLite<br/>';
+		    $valid_pdo_driver++;
+		}
+		else
+		{
+		    echo 'SQLite not possible (driver missing)!<br/>';
+		}
 
-    if ( extension_loaded('pdo_sqlite') ) {
-        print '<input type="radio" name="dbType" value="sqlite" checked="checked" /> SQLite ';
-        $validPdoDriver++;
-    } else {
-        print 'SQLite not possible (Driver missing) <br>';
-    }
+		// PostgreSQL
+		if (extension_loaded('pdo_pgsql'))
+		{
+		    echo '<input type="radio" name="dbtype" value="pgsql" /> PostgreSQL<br/>';
+		    $valid_pdo_driver++;
+		}
+		else
+		{
+		    echo 'MySQL not possible (driver missing)!<br/>';
+		}
 
-    if ( $validPdoDriver < 1 ) {
-        print '<hr> No valid pdo driver found! Please install a valid pdo driver first <hr>';
-    } else {
-        print '<input type="hidden" name="action" value="step1">
-        <p><input type="submit" value="OK" /></p>';
-    }
+		// MySQL
+		if (extension_loaded('pdo_mysql'))
+		{
+		    echo '<input type="radio" name="dbtype" value="mysql" /> MySQL<br/>';
+		    $valid_pdo_driver++;
+		}
+		else
+		{
+		    echo 'PostgreSQL not possible (driver missing)!<br/>';
+		}
 
-    // ensure we bail out at this point ;)
-    exit();
-};
+
+		if ($valid_pdo_driver < 1)
+		{
+		    echo '<hr> No valid pdo driver found! Please install a valid pdo driver first <hr>';
+		}
+		else
+		{
+		    echo '<input type="hidden" name="action" value="step2">
+		    <p><input type="submit" value="OK" /></p>';
+		    echo_form_footer();
+		}
+
+		echo_footer();
+	};
 
 
-// step 2 (connection data) below
-//
-if ( $action == "step1" ) {
+	// step 2 - database details
+	if ($action == 'step2')
+	{
+		// first check if we have valid data
+		if (!extension_loaded('PDO'))
+		{
+		    echo 'ERROR - This type of database (' . $db_type . ') is not supported at the moment!';
+		    exit();
+		}
 
-    // now check if the database is in place
-    //
-    print_header("Setup FSyncMS - DB Setup: $dbType!");
-    switch ( $dbType ) {
-        case "sqlite":
-            $action = "step2";
-            break;
+		echo_header('Setup FSyncMS - DB settings: ' . $db_type);
 
-        case "mysql":
-            print_mysql_connection_form();
-            break;
+		echo_form_header();
 
-        default:
-            print "ERROR - This type of database ($dbType) is not valid at the moment!";
-            exit();
-            break;
-    }
+		echo '<table>
+					<tr>
+						<td>Database name</td>
+						<td><input type="text" name="dbname" /></td>
+					</tr>
+					<tr>
+						<td>Table Prefix</td>
+						<td><input type="text" name="dbtableprefix" /></td>
+					</tr>';
 
-}
+		if ($db_type != 'sqlite')
+		{
+			echo '	<tr>
+						<td>Host</td>
+						<td><input type="text" name="dbhost" /></td>
+					</tr>
+					<tr>
+						<td>Username</td>
+						<td><input type="text" name="dbuser" /></td>
+					</tr>
+					<tr>
+						<td>Password</td>
+						<td><input type="password" name="dbpass" /></td>
+					</tr>';
+		}
 
-// now generate the database
-//
-if ( $action == "step2" ) {
+		echo '	</table>
 
-    $dbInstalled = false;
-    $dbHandle = null;
-    try {
+				<input type="hidden" name="action" value="step3">
+				<input type="hidden" name="dbtype" value="' . $db_type . '">
+				<p><input type="submit" value="OK"></p>';
 
-        if ( $dbType == "sqlite" ) {
+		echo_form_footer();
 
-            $path = explode('/', $_SERVER['SCRIPT_FILENAME']);
-            $db_name = 'weave_db';
-            array_pop($path);
-            array_push($path, $db_name);
-            $db_name = implode('/', $path);
+		echo_footer();
+	}
 
-            if ( file_exists($db_name) && filesize( $db_name ) > 0 ) {
-                $dbInstalled = true;
-            } else {
-                echo("Creating sqlite weave storage: ". $db_name ."<br>");
-                $dbHandle = new PDO('sqlite:' . $db_name);
-                $dbHandle->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            }
 
-        } else if ( $dbType == "mysql" ) {
+	// step 3 - create the database
+	if ($action == 'step3')
+	{
+		echo_header('Setup FSyncMS - DB setup: ' . $db_type);
 
-            $dbHandle = new PDO("mysql:host=". $dbHost .";dbname=". $dbName, $dbUser, $dbPass);
-            $select_stmt = "show tables like 'wbo'";
-            $sth = $dbHandle->prepare($select_stmt);
-            $sth->execute();
-            $count = $sth->rowCount();
-            if ( $count > 0 ) {
-                $dbInstalled = true;
-            }
+		$db_installed = false;
+		$db_handle = null;
+		try
+		{
+			switch ($db_type)
+			{
+				case 'sqlite':
+				    $path = explode('/', $_SERVER['SCRIPT_FILENAME']);
+				    array_pop($path);
+				    array_push($path, $db_name);
+				    $db_name = implode('/', $path);
 
-        };
+				    if (file_exists($db_name) && filesize($db_name) > 0)
+				    {
+				        $db_installed = true;
+				    }
+				    else
+				    {
+				        echo('Creating sqlite weave storage: ' . $db_name . '<br/>');
+				        $db_handle = new PDO('sqlite:' . $db_name);
+				        $db_handle->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+				    }
+					break;
+				case 'pgsql':
+				    $db_handle = new PDO('pgsql:host='. $db_host . ';dbname=' . $db_name, $db_user, $db_pass);
 
-    } catch ( PDOException $exception ) {
-        echo("database unavailable " . $exception->getMessage());
-        throw new Exception("Database unavailable " . $exception->getMessage() , 503);
-    }
+				    $sth = $db_handle->prepare('SELECT table_name FROM information_schema.tables WHERE table_schema = \'public\' AND table_name = \'' . $db_table_prefix . '_wbo\';');
+				    $sth->execute();
 
-    if ( $dbInstalled ) {
-        echo "DB is already installed!<br>";
+				    $count = $sth->rowCount();
+				    if ($count > 0)
+				    {
+				        $db_installed = true;
+				    }
+				    break;
+				case 'mysql':
+				    $db_handle = new PDO('mysql:host=' . $db_host . ';dbname=' . $db_name, $db_user, $db_pass);
 
-    } else {
-        echo "Now going to install the new database! Type is: $dbType<br>";
+				    $sth = $db_handle->prepare('SHOW TABLES LIKE "' . $db_table_prefix . '_wbo";');
+				    $sth->execute();
 
-        try {
-            $create_statement = " create table wbo ( username varchar(100), id varchar(65), collection varchar(100),
-                 parentid  varchar(65), predecessorid int, modified real, sortindex int,
-                 payload text, payload_size int, ttl int, primary key (username,collection,id))";
-            $create_statement2 = " create table users ( username varchar(255), md5 varchar(124), primary key (username)) ";
-            $index1 = 'create index parentindex on wbo (username, parentid)';
-            $index2 = 'create index predecessorindex on wbo (username, predecessorid)';
-            $index3 = 'create index modifiedindex on wbo (username, collection, modified)';
+				    $count = $sth->rowCount();
+				    if ($count > 0)
+				    {
+				        $db_installed = true;
+				    }
+				    break;
+			}
+		}
+		catch (PDOException $exception)
+		{
+		    echo('Database unavailable ' . $exception->getMessage());
+		    throw new Exception('Database unavailable ' . $exception->getMessage() , 503);
+		}
 
-            $sth = $dbHandle->prepare($create_statement);
-            $sth->execute();
-            $sth = $dbHandle->prepare($create_statement2);
-            $sth->execute();
-            $sth = $dbHandle->prepare($index1);
-            $sth->execute();
-            $sth = $dbHandle->prepare($index2);
-            $sth->execute();
-            $sth = $dbHandle->prepare($index3);
-            $sth->execute();
-            echo "Database created <br>";
+		if ($db_installed)
+		{
+		    echo 'DB is already installed!<br/>';
+		}
+		else
+		{
+		    echo 'Now going to install the new database! Type is: ' . $dbType . '<br>';
 
-        } catch( PDOException $exception ) { 
-            throw new Exception("Database unavailable", 503);
-        }  
+		    try
+		    {
+		        $create_statement = 'CREATE TABLE ' . $db_table_prefix . '_wbo (username varchar(100), id varchar(65), collection varchar(100),
+		             parentid  varchar(65), predecessorid int, modified real, sortindex int,
+		             payload text, payload_size int, ttl int, PRIMARY KEY (username,collection,id));';
+		        $create_statement2 = 'CREATE TABLE ' . $db_table_prefix . '_users (username varchar(255), md5 varchar(124), primary key (username));';
+		        $index1 = 'CREATE INDEX parentindex ON ' . $db_table_prefix . '_wbo (username, parentid);';
+		        $index2 = 'CREATE INDEX predecessorindex ON ' . $db_table_prefix . '_wbo (username, predecessorid);';
+		        $index3 = 'CREATE INDEX modifiedindex ON ' . $db_table_prefix . '_wbo (username, collection, modified);';
 
-    }
+		        $sth = $db_handle->prepare($create_statement);
+		        $sth->execute();
+		        $sth = $db_handle->prepare($create_statement2);
+		        $sth->execute();
+		        $sth = $db_handle->prepare($index1);
+		        $sth->execute();
+		        $sth = $db_handle->prepare($index2);
+		        $sth->execute();
+		        $sth = $db_handle->prepare($index3);
+		        $sth->execute();
+		        echo 'Database created...<br/>';
+		    }
+		    catch(PDOException $exception)
+		    {
+		        throw new Exception('Database unavailable', 503);
+		    }
 
-    //guessing fsroot
-      // get the FSYNC_ROOT url
-    //  
-    $fsRoot ="https://";
-    if ( ! isset($_SERVER['HTTPS']) ) { 
-        $fsRoot = "http://";
-    }   
-    $fsRoot .= $_SERVER['SERVER_NAME'] . dirname($_SERVER['SCRIPT_NAME']) . "/";
-    if( strpos( $_SERVER['REQUEST_URI'], 'index.php') !== 0 ) { 
-        $fsRoot .= "index.php/";
-    }   
+		}
 
-    // write settings.php, if not possible, display the needed contant
-    //
-    write_config_file($dbType, $dbHost, $dbName, $dbUser, $dbPass, $fsRoot);
+		// get the FSYNC_ROOT url
+		$fsRoot ='https://';
+		if (!isset($_SERVER['HTTPS']))
+		{
+		    $fsRoot = 'http://';
+		}
+		$fsRoot .= $_SERVER['SERVER_NAME'] . dirname($_SERVER['SCRIPT_NAME']) . '/';
+		if(strpos( $_SERVER['REQUEST_URI'], 'index.php') !== 0)
+		{
+		    $fsRoot .= 'index.php/';
+		}
 
-    echo "<hr><hr> Finished the setup, please delete setup.php and go on with the FFSync<hr><hr>";
-    echo <<<EOT
-        <hr><hr>                                                                                                            
-         <h4>This script has guessed the Address of your installation, this might not be accurate,<br/>
-         Please check if this script can be reached by <a href="$fsRoot">$fsRoot</a> .<br/>
-         If thats not the case you have to ajust the settings.php<br />
-         </h4>
-EOT;
-}
+		// write settings.php, if not possible, display the needed content
+		write_config_file($db_type, $db_host, $db_name, $db_user, $db_pass, $fsRoot, $db_table_prefix);
+
+		echo '<hr><h2> Finished setup, please delete setup.php!</h2><hr>
+			<h4>This script has guessed the Address of your installation, this might not be accurate.<br/>
+		    Please check if this script can be reached by <a href="' . $fsRoot . '">' . $fsRoot . '</a> and also make sure to allow any self signed SSL certificate.<br/>
+		    If thats not the case you have to ajust the settings.php manually!<br/></h4>';
+
+		echo_footer();
+	}
 
 ?>
