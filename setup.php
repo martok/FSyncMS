@@ -233,7 +233,6 @@ function echo_footer()
 		    echo 'ERROR - PDO is missing in the php installation!';
 		    exit();
 		}
-		$valid_pdo_driver = 0;
 
 		echo_header('Setup FSyncMS - DB engine selection');
 
@@ -241,39 +240,27 @@ function echo_footer()
 
 		echo_form_header();
 
-		// SQLite
-		if (extension_loaded('pdo_sqlite'))
-		{
-		    echo '<input type="radio" name="dbtype" value="sqlite" checked="checked" /> SQLite<br/>';
-		    $valid_pdo_driver++;
-		}
-		else
-		{
-		    echo 'SQLite not possible (driver missing)!<br/>';
-		}
+		$drivers = array(
+			'sqlite' => 'SQLite',
+			'pgsql' => 'PostgreSQL',
+			'mysql' => 'MySQL'
+		);
 
-		// PostgreSQL
-		if (extension_loaded('pdo_pgsql'))
+		$valid_pdo_driver = 0;
+		$checkfirst = ' checked="checked"';
+		foreach($drivers as $driver => $caption)
 		{
-		    echo '<input type="radio" name="dbtype" value="pgsql" /> PostgreSQL<br/>';
-		    $valid_pdo_driver++;
+			if (extension_loaded('pdo_'.$driver))
+			{
+				echo '<input type="radio" name="dbtype" value="'.$driver.'"'.$checkfirst.' />'.$caption.'<br/>';
+				$checkfirst = '';
+				$valid_pdo_driver++;
+			}
+			else
+			{
+				echo $caption.' not possible (driver missing)!<br/>';
+			}
 		}
-		else
-		{
-		    echo 'MySQL not possible (driver missing)!<br/>';
-		}
-
-		// MySQL
-		if (extension_loaded('pdo_mysql'))
-		{
-		    echo '<input type="radio" name="dbtype" value="mysql" /> MySQL<br/>';
-		    $valid_pdo_driver++;
-		}
-		else
-		{
-		    echo 'PostgreSQL not possible (driver missing)!<br/>';
-		}
-
 
 		if ($valid_pdo_driver < 1)
 		{
