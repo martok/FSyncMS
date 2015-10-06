@@ -99,7 +99,7 @@
 	}
 
 	$path = substr($path, 1); //chop the lead slash
-	log_error('start request_____'.$path);
+	log_error('start request '.$_SERVER['REQUEST_METHOD'].' '.$path);
 
     // ensure that we got a valid request
     if (!$path)

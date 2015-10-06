@@ -321,7 +321,7 @@
                 catch(Exception $e)
                 {
                   header("X-Weave-Backoff: 1800");
-                  log_error($e->getMessage(), $e->getCode());
+                  log_error($e->getCode() . $e->getMessage());
                   report_problem($e->getMessage(), $e->getCode());
                 }
             }

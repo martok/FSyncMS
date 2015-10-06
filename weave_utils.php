@@ -51,14 +51,14 @@
 	define ('WEAVE_ERROR_INVALID_COLLECTION', 13);
 
 
-    function log_error($msg, $stderr = false)
+    function log_error($msg)
     {
         if (LOG_THE_ERROR)
         {
+			$line = sprintf("%s\t%s\n",date(DATE_ISO8601),$msg);
+
             $datei = fopen('/tmp/FSyncMS-error.txt','a');
-            $fmsg = sprintf("$msg\n");
-            fputs($datei, $fmsg);
-            fputs($datei, 'Server ' . print_r($_SERVER, true));
+            fputs($datei, $line);
             fclose($datei);
         }
     }
@@ -77,7 +77,7 @@
 		{
 			header('WWW-Authenticate: Basic realm="Weave"');
 		}
-	    log_error($message);
+	    log_error(sprintf('HTTP error %d: %s', $code, $message));
 
 		exit(json_encode($message));
 	}
