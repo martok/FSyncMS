@@ -400,7 +400,7 @@ function echo_footer()
 		    try
 		    {
 		        $create_statement = 'CREATE TABLE ' . $db_table_prefix . '_wbo (username varchar(100), id varchar(65), collection varchar(100),
-		             parentid  varchar(65), predecessorid int, modified real, sortindex int,
+		             parentid  varchar(65), predecessorid int, modified double precision, sortindex int,
 		             payload text, payload_size int, ttl int, PRIMARY KEY (username,collection,id));';
 		        $create_statement2 = 'CREATE TABLE ' . $db_table_prefix . '_users (username varchar(255), md5 varchar(124), primary key (username));';
 		        $index1 = 'CREATE INDEX parentindex ON ' . $db_table_prefix . '_wbo (username, parentid);';
