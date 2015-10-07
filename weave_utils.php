@@ -95,6 +95,46 @@
 		}
 	}
 
+	function get_path()
+	{
+		// Basic path extraction and validation. No point in going on if these are missing
+		if (!isset($_SERVER['PATH_INFO']))
+		{
+			$path = $_SERVER['PATH_INFO'];
+		}
+		else if (!isset($_SERVER['ORIG_PATH_INFO']))
+		{
+			$path = $_SERVER['ORIG_PATH_INFO'];
+		}
+		else if (!isset($_SERVER['REQUEST_URI']))
+		{
+			log_error('experimental path');
+			// this is kind of an experimental try, i needed it so i build it,
+			// but that doesent mean that it does work... well it works for me
+			// and it shouldnt break anything...
+			$path = $_SERVER['REQUEST_URI'];
+			$lastfolder = substr(FSYNCMS_ROOT, strrpos(FSYNCMS_ROOT, '/', -2));
+			$path = substr($path, (strpos($path,$lastfolder) + strlen($lastfolder)-1)); //chop the lead slash
+			if (strpos($path,'?') != false)
+			{
+				$path = substr($path, 0, strpos($path,'?')); //remove php arguments
+			}
+			log_error('path_exp: '.$path);
+		}
+		else
+		{
+			report_problem('No path found', 404);
+		}
+		// chop the lead slash, if present
+		if ($path==='' || $path==='/')
+		{
+			return '';
+		} else
+		{
+			return substr($path, 1);
+		}
+	}
+
     function get_phpinput()
     {
         // stupid php being helpful with input data...
