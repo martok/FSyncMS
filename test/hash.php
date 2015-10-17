@@ -25,7 +25,7 @@ try {
 	if ($hash->needsUpdate('$2a$12$O2Bn6lDUYS5NDIJ1uCZjGezSI/jeGTD7Ow0bd3PFMRBcGIqfqI4Oi')) {
 		throw new Exception("bcrypt hash doesn't needs update.");
 	}
-	
+
 	if (!$hash->verify($pwd, 'a96b71c678b01b98b9f7a0d8ec4b633b')) {
 		throw new Exception("bcrypt hash compare with md5 failed");
 	}
@@ -51,7 +51,7 @@ try {
 
 	echo "all tests ok\n";
 	exit(0);
-} catch(Exception $e) {
+} catch (Exception $e) {
 	echo $e->getMessage() . "\n";
 	exit(1);
 }

@@ -49,20 +49,17 @@ class WBOJsonOutput
 	private $_comma_flag = 0;
 	private $_output_format = 'json';
 
-	function __construct ($full = false)
+	function __construct($full = false)
 	{
 		$this->_full = $full;
 		if (array_key_exists('HTTP_ACCEPT', $_SERVER)
 			&& !preg_match('/\*\/\*/', $_SERVER['HTTP_ACCEPT'])
-			&& !preg_match('/application\/json/', $_SERVER['HTTP_ACCEPT']))
-		{
-			if (preg_match('/application\/whoisi/', $_SERVER['HTTP_ACCEPT']))
-			{
+			&& !preg_match('/application\/json/', $_SERVER['HTTP_ACCEPT'])
+		) {
+			if (preg_match('/application\/whoisi/', $_SERVER['HTTP_ACCEPT'])) {
 				header("Content-type: application/whoisi");
 				$this->_output_format = 'whoisi';
-			}
-			elseif (preg_match('/application\/newlines/', $_SERVER['HTTP_ACCEPT']))
-			{
+			} elseif (preg_match('/application\/newlines/', $_SERVER['HTTP_ACCEPT'])) {
 				header("Content-type: application/newlines");
 				$this->_output_format = 'newlines';
 			}
@@ -78,20 +75,14 @@ class WBOJsonOutput
 
 	function output($sth)
 	{
-		if (($rowcount = $sth->rowCount()) > 0)
-		{
+		if (($rowcount = $sth->rowCount()) > 0) {
 			header('X-Weave-Records: ' . $rowcount);
 		}
-		if ($this->_output_format == 'newlines')
-		{
+		if ($this->_output_format == 'newlines') {
 			return $this->output_newlines($sth);
-		}
-		else if ($this->_output_format == 'whoisi')
-		{
+		} else if ($this->_output_format == 'whoisi') {
 			return $this->output_whoisi($sth);
-		}
-		else
-		{
+		} else {
 			return $this->output_json($sth);
 		}
 	}
@@ -100,25 +91,18 @@ class WBOJsonOutput
 	{
 		echo '[';
 
-		while ($result = $sth->fetch(PDO::FETCH_ASSOC))
-		{
-			if ($this->_comma_flag)
-			{
+		while ($result = $sth->fetch(PDO::FETCH_ASSOC)) {
+			if ($this->_comma_flag) {
 				echo ',';
-			}
-			else
-			{
+			} else {
 				$this->_comma_flag = 1;
 			}
 
-			if ($this->_full)
-			{
+			if ($this->_full) {
 				$wbo = new wbo();
 				$wbo->populate($result);
 				echo $wbo->json();
-			}
-			else
-			{
+			} else {
 				echo json_encode($result{'id'});
 			}
 		}
@@ -129,16 +113,12 @@ class WBOJsonOutput
 
 	function output_whoisi($sth)
 	{
-		while ($result = $sth->fetch(PDO::FETCH_ASSOC))
-		{
-			if ($this->_full)
-			{
+		while ($result = $sth->fetch(PDO::FETCH_ASSOC)) {
+			if ($this->_full) {
 				$wbo = new wbo();
 				$wbo->populate($result);
 				$output = $wbo->json();
-			}
-			else
-			{
+			} else {
 				$output = json_encode($result{'id'});
 			}
 			echo pack('N', mb_strlen($output, '8bit')) . $output;
@@ -148,16 +128,12 @@ class WBOJsonOutput
 
 	function output_newlines($sth)
 	{
-		while ($result = $sth->fetch(PDO::FETCH_ASSOC))
-		{
-			if ($this->_full)
-			{
+		while ($result = $sth->fetch(PDO::FETCH_ASSOC)) {
+			if ($this->_full) {
 				$wbo = new wbo();
 				$wbo->populate($result);
 				echo preg_replace('/\n/', '\u000a', $wbo->json());
-			}
-			else
-			{
+			} else {
 				echo json_encode($result{'id'});
 			}
 			echo "\n";
@@ -165,4 +141,5 @@ class WBOJsonOutput
 		return 1;
 	}
 }
+
 ?>

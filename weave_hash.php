@@ -32,38 +32,48 @@
 #
 # ***** END LICENSE BLOCK *****
 
-interface WeaveHash {
+interface WeaveHash
+{
 	public function hash($input);
+
 	public function verify($input, $existingHash);
+
 	public function needsUpdate($existingHash);
 }
 
-class WeaveHashMD5 implements WeaveHash {
-	public function hash($input) {
+class WeaveHashMD5 implements WeaveHash
+{
+	public function hash($input)
+	{
 		return md5($input);
 	}
 
-	public function verify($input, $existingHash) {
+	public function verify($input, $existingHash)
+	{
 		return $this->hash($input) == $existingHash;
 	}
 
-	public function needsUpdate($existingHash) {
+	public function needsUpdate($existingHash)
+	{
 		return substr($existingHash, 0, 4) == "$2a$";
 	}
 }
 
-class WeaveHashBCrypt implements  WeaveHash {
+class WeaveHashBCrypt implements WeaveHash
+{
 	private $_rounds;
 
-	public function  __construct($rounds = 12) {
-		if(CRYPT_BLOWFISH != 1) {
+	public function  __construct($rounds = 12)
+	{
+		if (CRYPT_BLOWFISH != 1) {
 			throw new Exception("bcrypt not available");
 		}
 
 		$this->_rounds = $rounds;
 	}
 
-	public function hash($input) {
+	public function hash($input)
+	{
 		$hash = crypt($input, $this->getSalt());
 
 		if (strlen($hash) <= 13) {
@@ -73,27 +83,31 @@ class WeaveHashBCrypt implements  WeaveHash {
 		return $hash;
 	}
 
-	public function verify($input, $existingHash) {
+	public function verify($input, $existingHash)
+	{
 		if ($this->isMD5($existingHash)) {
 			$md5 = new WeaveHashMD5();
 			return $md5->verify($input, $existingHash);
 		}
-		
+
 		$hash = crypt($input, $existingHash);
 
 		return $hash === $existingHash;
 	}
 
-	public function needsUpdate($existingHash) {
+	public function needsUpdate($existingHash)
+	{
 		$identifier = $this->getIdentifier();
 		return substr($existingHash, 0, strlen($identifier)) != $identifier;
 	}
-	
-	private function isMD5($existingHash) {
+
+	private function isMD5($existingHash)
+	{
 		return substr($existingHash, 0, 4) != "$2a$";
 	}
 
-	private function getSalt() {
+	private function getSalt()
+	{
 		$salt = $this->getIdentifier();
 
 		$bytes = $this->getRandomBytes(16);
@@ -102,37 +116,42 @@ class WeaveHashBCrypt implements  WeaveHash {
 
 		return $salt;
 	}
-	
-	private function getIdentifier() {
+
+	private function getIdentifier()
+	{
 		return sprintf("$2a$%02d$", $this->_rounds);
 	}
 
 	private $randomState;
-	private function getRandomBytes($count) {
+
+	private function getRandomBytes($count)
+	{
 		$bytes = '';
 
-		if(function_exists('openssl_random_pseudo_bytes') &&
-				(strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN')) { // OpenSSL slow on Win
+		if (function_exists('openssl_random_pseudo_bytes') &&
+			(strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN')
+		) { // OpenSSL slow on Win
 			$bytes = openssl_random_pseudo_bytes($count);
 		}
 
-		if($bytes === '' && is_readable('/dev/urandom') &&
-				($hRand = @fopen('/dev/urandom', 'rb')) !== FALSE) {
+		if ($bytes === '' && is_readable('/dev/urandom') &&
+			($hRand = @fopen('/dev/urandom', 'rb')) !== FALSE
+		) {
 			$bytes = fread($hRand, $count);
 			fclose($hRand);
 		}
 
-		if(strlen($bytes) < $count) {
+		if (strlen($bytes) < $count) {
 			$bytes = '';
 
-			if($this->randomState === null) {
+			if ($this->randomState === null) {
 				$this->randomState = microtime();
-				if(function_exists('getmypid')) {
+				if (function_exists('getmypid')) {
 					$this->randomState .= getmypid();
 				}
 			}
 
-			for($i = 0; $i < $count; $i += 16) {
+			for ($i = 0; $i < $count; $i += 16) {
 				$this->randomState = md5(microtime() . $this->randomState);
 
 				if (PHP_VERSION >= '5') {
@@ -148,7 +167,8 @@ class WeaveHashBCrypt implements  WeaveHash {
 		return $bytes;
 	}
 
-	private function encodeBytes($input) {
+	private function encodeBytes($input)
+	{
 		// The following is code from the PHP Password Hashing Framework
 		$itoa64 = './ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
@@ -178,8 +198,10 @@ class WeaveHashBCrypt implements  WeaveHash {
 	}
 }
 
-class WeaveHashFactory {
-	public static function factory() {
+class WeaveHashFactory
+{
+	public static function factory()
+	{
 		if (defined("BCRYPT") && BCRYPT) {
 			return new WeaveHashBCrypt(BCRYPT_ROUNDS);
 		} else {
