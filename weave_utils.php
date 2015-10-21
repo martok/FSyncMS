@@ -120,6 +120,19 @@ function get_path()
 	}
 }
 
+function get_https()
+{
+	if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']!=='off') {
+		return true;
+	}
+
+	if (isset($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
+		return $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https';
+	}
+
+	return false;
+}
+
 function get_phpinput()
 {
 	// stupid php being helpful with input data...

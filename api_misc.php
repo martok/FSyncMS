@@ -13,17 +13,13 @@
 # for the specific language governing rights and limitations under the
 # License.
 #
-# The Original Code is Weave Minimal Server
+# The Initial Developer of the Original Code is balu
 #
-# The Initial Developer of the Original Code is
-# Mozilla Labs.
-# Portions created by the Initial Developer are Copyright (C) 2008
+# Portions created by the Initial Developer are Copyright (C) 2012
 # the Initial Developer. All Rights Reserved.
 #
 # Contributor(s):
-#	Toby Elliott (telliott@mozilla.com)
-#	Luca Tettamanti
-#	Martin-Jan Sklorz (m.skl@lemsgbr.de)
+#	Martok
 #
 # Alternatively, the contents of this file may be used under the terms of
 # either the GNU General Public License Version 2 or later (the 'GPL'), or
@@ -39,58 +35,40 @@
 #
 # ***** END LICENSE BLOCK *****
 
-if (!file_exists('settings.php') && file_exists('setup.php')) {
-	require_once 'setup.php';
-	exit;
-
-} else if (!file_exists('settings.php')) {
-	echo '<hr><h2>Maybe the setup is not completed, missing settings.php!</h2><hr>';
-	exit;
-
-} else if (file_exists('setup.php')) {
-	echo '<hr><h2>Maybe the setup is not completed, else please delete setup.php!</h2><hr>';
-	exit;
-}
-
-require_once 'weave_storage.php';
-require_once 'weave_basic_object.php';
 require_once 'weave_utils.php';
-require_once 'weave_hash.php';
-
-require_once 'WBOJsonOutput.php';
-
-$server_time = round(microtime(1), 2);
-header('X-Weave-Timestamp: ' . $server_time);
-
-$path = get_path();
-
-log_error('start request ' . $_SERVER['REQUEST_METHOD'] . ' /' . $path);
-
-// ensure that we got a valid request
-if (!$path) {
-	report_problem('Invalid request, this was not a firefox sync request!', 400);
+if (!defined('INDEX_INCLUDE')) //file should only be used in context of index.php
+{
+	log_error('include error');
+	report_problem('Function not found', 404);
 }
 
-header('Content-type: application/json');
-define('INDEX_INCLUDE', true);
+require_once 'settings.php';
 
-$requestParts = explode('/', $path);
-$requestMethod = $_SERVER['REQUEST_METHOD'];
+$version = array_shift($requestParts);
 
-$api = array_shift($requestParts);
+switch ($version) {
+	case '1.0': {
+		$function = array_shift($requestParts);
 
-switch ($api) {
-	case 'user':
-		require 'api_user.php';
+		switch ($function) {
+			case 'captcha_html': {
+				if ($requestMethod !== 'GET') {
+					report_problem(WEAVE_ERROR_INVALID_PROTOCOL, 400);
+				}
+
+				header('Content-Type: text/html', true);
+
+				if (ENABLE_REGISTER) {
+					exit('Fill in the details and click next.');
+				} else {
+					exit('Registration is currently closed, sorry.');
+				}
+			}
+			default:
+				report_problem(WEAVE_ERROR_INVALID_PROTOCOL, 400);
+		}
 		break;
-	case 'misc':
-		require 'api_misc.php';
-		break;
-	case '1.0':
-	case '1.1':
-		require 'api_weave.php';
-		break;
+	}
 	default:
 		report_problem('Function not found', 404);
 }
-?>
