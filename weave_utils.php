@@ -98,15 +98,15 @@
 	function get_path()
 	{
 		// Basic path extraction and validation. No point in going on if these are missing
-		if (!isset($_SERVER['PATH_INFO']))
+		if (isset($_SERVER['PATH_INFO']))
 		{
 			$path = $_SERVER['PATH_INFO'];
 		}
-		else if (!isset($_SERVER['ORIG_PATH_INFO']))
+		else if (isset($_SERVER['ORIG_PATH_INFO']))
 		{
 			$path = $_SERVER['ORIG_PATH_INFO'];
 		}
-		else if (!isset($_SERVER['REQUEST_URI']))
+		else if (isset($_SERVER['REQUEST_URI']))
 		{
 			log_error('experimental path');
 			// this is kind of an experimental try, i needed it so i build it,
