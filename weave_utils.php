@@ -207,22 +207,22 @@ function verify_user($url_user, $db)
 		report_problem(WEAVE_ERROR_INVALID_USERNAME, 400);
 	}
 
-	$auth_user = array_key_exists('PHP_AUTH_USER', $_SERVER) ? $_SERVER['PHP_AUTH_USER'] : null;
-	$auth_pw = array_key_exists('PHP_AUTH_PW', $_SERVER) ? $_SERVER['PHP_AUTH_PW'] : null;
+	$auth_user = isset($_SERVER['PHP_AUTH_USER']) ? $_SERVER['PHP_AUTH_USER'] : null;
+	$auth_pw = isset($_SERVER['PHP_AUTH_PW']) ? $_SERVER['PHP_AUTH_PW'] : null;
 
 	if (is_null($auth_user) || is_null($auth_pw)) {
 		/* CGI/FCGI auth workarounds */
 		$auth_str = null;
-		if (array_key_exists('Authorization', $_SERVER)) {
+		if (isset($_SERVER['Authorization'])) {
 			/* Standard fastcgi configuration */
 			$auth_str = $_SERVER['Authorization'];
-		} else if (array_key_exists('AUTHORIZATION', $_SERVER)) {
+		} else if (isset($_SERVER['AUTHORIZATION'])) {
 			/* Alternate fastcgi configuration */
 			$auth_str = $_SERVER['AUTHORIZATION'];
-		} else if (array_key_exists('HTTP_AUTHORIZATION', $_SERVER)) {
+		} else if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
 			/* IIS/ISAPI and newer (yet to be released) fastcgi */
 			$auth_str = $_SERVER['HTTP_AUTHORIZATION'];
-		} else if (array_key_exists('REDIRECT_HTTP_AUTHORIZATION', $_SERVER)) {
+		} else if (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
 			/* mod_rewrite - per-directory internal redirect */
 			$auth_str = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
 		}
@@ -292,7 +292,7 @@ function check_quota(&$db)
 
 function check_timestamp($collection, &$db)
 {
-	if (array_key_exists('HTTP_X_IF_UNMODIFIED_SINCE', $_SERVER)
+	if (isset($_SERVER['HTTP_X_IF_UNMODIFIED_SINCE'])
 		&& $db->get_max_timestamp($collection) > $_SERVER['HTTP_X_IF_UNMODIFIED_SINCE']
 	) {
 		report_problem(WEAVE_ERROR_NO_OVERWRITE, 412);
@@ -302,18 +302,18 @@ function check_timestamp($collection, &$db)
 function validate_search_params()
 {
 	$params = array();
-	$params['parentid'] = (array_key_exists('parentid', $_GET) && mb_strlen($_GET['parentid'], '8bit') <= 64 && strpos($_GET['parentid'], '/') === false) ? $_GET['parentid'] : null;
-	$params['predecessorid'] = (array_key_exists('predecessorid', $_GET) && mb_strlen($_GET['predecessorid'], '8bit') <= 64 && strpos($_GET['predecessorid'], '/') === false) ? $_GET['predecessorid'] : null;
+	$params['parentid'] = (isset($_GET['parentid']) && mb_strlen($_GET['parentid'], '8bit') <= 64 && strpos($_GET['parentid'], '/') === false) ? $_GET['parentid'] : null;
+	$params['predecessorid'] = (isset($_GET['predecessorid']) && mb_strlen($_GET['predecessorid'], '8bit') <= 64 && strpos($_GET['predecessorid'], '/') === false) ? $_GET['predecessorid'] : null;
 
-	$params['newer'] = (array_key_exists('newer', $_GET) && is_numeric($_GET['newer'])) ? round($_GET['newer'], 2) : null;
-	$params['older'] = (array_key_exists('older', $_GET) && is_numeric($_GET['older'])) ? round($_GET['older'], 2) : null;
+	$params['newer'] = (isset($_GET['newer']) && is_numeric($_GET['newer'])) ? round($_GET['newer'], 2) : null;
+	$params['older'] = (isset($_GET['older']) && is_numeric($_GET['older'])) ? round($_GET['older'], 2) : null;
 
-	$params['sort'] = (array_key_exists('sort', $_GET) && ($_GET['sort'] == 'oldest' || $_GET['sort'] == 'newest' || $_GET['sort'] == 'index')) ? $_GET['sort'] : null;
-	$params['limit'] = (array_key_exists('limit', $_GET) && is_numeric($_GET['limit']) && $_GET['limit'] > 0) ? (int)$_GET['limit'] : null;
-	$params['offset'] = (array_key_exists('offset', $_GET) && is_numeric($_GET['offset']) && $_GET['offset'] > 0) ? (int)$_GET['offset'] : null;
+	$params['sort'] = (isset($_GET['sort']) && ($_GET['sort'] == 'oldest' || $_GET['sort'] == 'newest' || $_GET['sort'] == 'index')) ? $_GET['sort'] : null;
+	$params['limit'] = (isset($_GET['limit']) && is_numeric($_GET['limit']) && $_GET['limit'] > 0) ? (int)$_GET['limit'] : null;
+	$params['offset'] = (isset($_GET['offset']) && is_numeric($_GET['offset']) && $_GET['offset'] > 0) ? (int)$_GET['offset'] : null;
 
 	$params['ids'] = null;
-	if (array_key_exists('ids', $_GET)) {
+	if (isset($_GET['ids'])) {
 		$params['ids'] = array();
 		foreach (explode(',', $_GET['ids']) as $id) {
 			if (mb_strlen($id, '8bit') <= 64 && strpos($id, '/') === false) {
@@ -322,9 +322,9 @@ function validate_search_params()
 		}
 	}
 
-	$params['index_above'] = (array_key_exists('index_above', $_GET) && is_numeric($_GET['index_above']) && $_GET['index_above'] > 0) ? (int)$_GET['index_above'] : null;
-	$params['index_below'] = (array_key_exists('index_below', $_GET) && is_numeric($_GET['index_below']) && $_GET['index_below'] > 0) ? (int)$_GET['index_below'] : null;
-	$params['depth'] = (array_key_exists('depth', $_GET) && is_numeric($_GET['depth']) && $_GET['depth'] > 0) ? (int)$_GET['depth'] : null;
+	$params['index_above'] = (isset($_GET['index_above']) && is_numeric($_GET['index_above']) && $_GET['index_above'] > 0) ? (int)$_GET['index_above'] : null;
+	$params['index_below'] = (isset($_GET['index_below']) && is_numeric($_GET['index_below']) && $_GET['index_below'] > 0) ? (int)$_GET['index_below'] : null;
+	$params['depth'] = (isset($_GET['depth']) && is_numeric($_GET['depth']) && $_GET['depth'] > 0) ? (int)$_GET['depth'] : null;
 
 	return $params;
 }

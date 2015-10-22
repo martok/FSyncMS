@@ -92,7 +92,7 @@ try {
 				}
 
 				// Deletes all records for the user.
-				if (!array_key_exists('HTTP_X_CONFIRM_DELETE', $_SERVER)) {
+				if (!isset($_SERVER['HTTP_X_CONFIRM_DELETE'])) {
 					report_problem(WEAVE_ERROR_NO_OVERWRITE, 412);
 				}
 				$db->delete_storage($username);
@@ -110,7 +110,7 @@ try {
 					case 'GET': {
 						// retrieve a batch of records. Sadly, due to potential record sizes, have the storage object stream the output...
 						log_error('retrieve a batch');
-						$full = array_key_exists('full', $_GET) && $_GET['full'];
+						$full = isset($_GET['full']) && $_GET['full'];
 
 						$outputter = new WBOJsonOutput($full);
 

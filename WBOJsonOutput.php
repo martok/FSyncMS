@@ -52,7 +52,7 @@ class WBOJsonOutput
 	function __construct($full = false)
 	{
 		$this->_full = $full;
-		if (array_key_exists('HTTP_ACCEPT', $_SERVER)
+		if (isset($_SERVER['HTTP_ACCEPT'])
 			&& !preg_match('/\*\/\*/', $_SERVER['HTTP_ACCEPT'])
 			&& !preg_match('/application\/json/', $_SERVER['HTTP_ACCEPT'])
 		) {
