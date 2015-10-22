@@ -56,9 +56,7 @@ function log_error($msg)
 	if (LOG_THE_ERROR) {
 		$line = sprintf("%s\t%s\n", date(DATE_ISO8601), $msg);
 
-		$datei = fopen('/tmp/FSyncMS-error.txt', 'a');
-		fputs($datei, $line);
-		fclose($datei);
+		file_put_contents('/tmp/FSyncMS-error.txt', $line, FILE_APPEND);
 	}
 }
 
