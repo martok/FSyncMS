@@ -9,13 +9,23 @@ can be found here:
 
 https://www.ohnekontur.de/category/technik/sync/fsyncms/
 
+**Contributing Authors**:
+
+* Balu (Original Author)
+* j-ed (passing HTTP/S state to iPhone/iPod Touch)
+* rivu (PostgreSQL support)
+* tobiashollerung (SQL improvements)
+* Trellmor (bcrypt passwort hashing)
+* Moonchild (Pale Moon Sync: Account removal)
+* Martok (merging forks, code refactoring)
+
+
 Although the original author has planned further extesnions to this implementation,
 the current state of this server implementation is rather stagnant ans missing two
 important features:
+
 * Delete account from the web
 * Reset password from the web (similar to reset inside the client)
-
-Current state is the state as-used by the Pale Moon Sync service, which is v0.13 with some minor updates.
 
 If you wish to help complete the missing features, please feel free to clone this repository and make 
 the necessary edits -- kindly submit a pull request after you've tested your changes so it can be merged
