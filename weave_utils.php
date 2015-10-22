@@ -133,6 +133,20 @@ function get_https()
 	return false;
 }
 
+function get_remote_ip()
+{
+	if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+		return $_SERVER['HTTP_X_FORWARDED_FOR'];
+	}
+	if (isset($_SERVER['HTTP_X_REAL_IP'])) {
+		return $_SERVER['HTTP_X_REAL_IP'];
+	}
+	if (isset($_SERVER['REMOTE_ADDR'])) {
+		return $_SERVER['REMOTE_ADDR'];
+	}
+	return 'x.x.x.x';
+}
+
 function get_phpinput()
 {
 	// stupid php being helpful with input data...
@@ -154,6 +168,59 @@ function get_json()
 	}
 
 	return $json;
+}
+
+function get_http_auth()
+{
+	static $auth_status = FALSE;
+
+	if ($auth_status !== FALSE) {
+		return $auth_status;
+	}
+
+	$auth_user = isset($_SERVER['PHP_AUTH_USER']) ? $_SERVER['PHP_AUTH_USER'] : null;
+	$auth_pw = isset($_SERVER['PHP_AUTH_PW']) ? $_SERVER['PHP_AUTH_PW'] : null;
+
+	if (is_null($auth_user) || is_null($auth_pw)) {
+		/* CGI/FCGI auth workarounds */
+		$auth_str = null;
+		if (isset($_SERVER['Authorization'])) {
+			/* Standard fastcgi configuration */
+			$auth_str = $_SERVER['Authorization'];
+		} else if (isset($_SERVER['AUTHORIZATION'])) {
+			/* Alternate fastcgi configuration */
+			$auth_str = $_SERVER['AUTHORIZATION'];
+		} else if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
+			/* IIS/ISAPI and newer (yet to be released) fastcgi */
+			$auth_str = $_SERVER['HTTP_AUTHORIZATION'];
+		} else if (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
+			/* mod_rewrite - per-directory internal redirect */
+			$auth_str = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
+		}
+
+		if (!is_null($auth_str)) {
+			/* Basic base64 auth string */
+			if (preg_match('/Basic\s+(.*)$/', $auth_str)) {
+				$auth_str = substr($auth_str, 6);
+				$auth_str = base64_decode($auth_str, true);
+				if ($auth_str != FALSE) {
+					$tmp = explode(':', $auth_str);
+					if (count($tmp) == 2) {
+						$auth_user = $tmp[0];
+						$auth_pw = $tmp[1];
+					}
+				}
+			}
+		}
+	}
+
+	if (is_null($auth_user) || is_null($auth_pw)) {
+		$auth_status = null;
+	} else {
+		$auth_status = array($auth_user, $auth_pw);
+	}
+
+	return $auth_status;
 }
 
 function validate_username($username)
@@ -207,41 +274,7 @@ function verify_user($url_user, $db)
 		report_problem(WEAVE_ERROR_INVALID_USERNAME, 400);
 	}
 
-	$auth_user = isset($_SERVER['PHP_AUTH_USER']) ? $_SERVER['PHP_AUTH_USER'] : null;
-	$auth_pw = isset($_SERVER['PHP_AUTH_PW']) ? $_SERVER['PHP_AUTH_PW'] : null;
-
-	if (is_null($auth_user) || is_null($auth_pw)) {
-		/* CGI/FCGI auth workarounds */
-		$auth_str = null;
-		if (isset($_SERVER['Authorization'])) {
-			/* Standard fastcgi configuration */
-			$auth_str = $_SERVER['Authorization'];
-		} else if (isset($_SERVER['AUTHORIZATION'])) {
-			/* Alternate fastcgi configuration */
-			$auth_str = $_SERVER['AUTHORIZATION'];
-		} else if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
-			/* IIS/ISAPI and newer (yet to be released) fastcgi */
-			$auth_str = $_SERVER['HTTP_AUTHORIZATION'];
-		} else if (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
-			/* mod_rewrite - per-directory internal redirect */
-			$auth_str = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
-		}
-
-		if (!is_null($auth_str)) {
-			/* Basic base64 auth string */
-			if (preg_match('/Basic\s+(.*)$/', $auth_str)) {
-				$auth_str = substr($auth_str, 6);
-				$auth_str = base64_decode($auth_str, true);
-				if ($auth_str != FALSE) {
-					$tmp = explode(':', $auth_str);
-					if (count($tmp) == 2) {
-						$auth_user = $tmp[0];
-						$auth_pw = $tmp[1];
-					}
-				}
-			}
-		}
-	}
+	list($auth_user, $auth_pw) = get_http_auth();
 
 	if (!$auth_user || !$auth_pw) // do this first to avoid the cryptic error message if auth is missing
 	{

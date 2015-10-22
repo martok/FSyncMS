@@ -65,7 +65,12 @@ header('X-Weave-Timestamp: ' . $server_time);
 
 $path = get_path();
 
-log_error('start request ' . $_SERVER['REQUEST_METHOD'] . ' /' . $path);
+log_error(
+	get_remote_ip() . ' ' .
+	(is_null(get_http_auth()) ? '-':'Authenticated') . "\t" .
+	$_SERVER['REQUEST_METHOD'] . ' '.
+	'/' . $path
+);
 
 // ensure that we got a valid request
 if (!$path) {
