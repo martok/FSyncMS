@@ -42,160 +42,140 @@ class wbo
 	var $_wbo_hash = array();
 	var $_collection;
 	var $_error = array();
-	
+
 	function extract_json(&$json)
 	{
 		$extracted = is_string($json) ? json_decode($json, true) : $json;
 
 		//need to check the json was valid here...
-		if ($extracted === null)
-		{
+		if ($extracted === null) {
 			$this->_error[] = 'unable to extract from json';
 			return false;
 		}
-		
+
 		//must have an id, or all sorts of badness happens. However, it can be added later
-		if (array_key_exists('id', $extracted))
-		{
+		if (array_key_exists('id', $extracted)) {
 			$this->id($extracted['id']);
 		}
-		
-		if (array_key_exists('parentid', $extracted))
-		{
+
+		if (array_key_exists('parentid', $extracted)) {
 			$this->parentid($extracted['parentid']);
 		}
-		
-		if (array_key_exists('predecessorid', $extracted))
-		{
+
+		if (array_key_exists('predecessorid', $extracted)) {
 			$this->predecessorid($extracted['predecessorid']);
 		}
 
-		if (array_key_exists('sortindex', $extracted))
-		{
+		if (array_key_exists('sortindex', $extracted)) {
 			//Due to complicated logic in the getter, we need to validate
 			//the value space of sortindex here.
-			if (!is_numeric($extracted['sortindex']))
-			{
+			if (!is_numeric($extracted['sortindex'])) {
 				$this->_error[] = 'invalid sortindex';
 				return false;
 			}
 			$this->sortindex($extracted['sortindex']);
 		}
-		
-		if (array_key_exists('payload', $extracted))
-		{
+
+		if (array_key_exists('payload', $extracted)) {
 			$this->payload($extracted['payload']);
 		}
 		return true;
 	}
-	
+
 	function populate(&$datahash)
 	{
-		if (array_key_exists('id', $datahash))
-		{
+		if (array_key_exists('id', $datahash)) {
 			$this->id($datahash['id']);
 		}
-			
-		if (array_key_exists('collection', $datahash))
-		{
+
+		if (array_key_exists('collection', $datahash)) {
 			$this->collection($datahash['collection']);
 		}
 
-		if (array_key_exists('parentid', $datahash))
-		{
+		if (array_key_exists('parentid', $datahash)) {
 			$this->parentid($datahash['parentid']);
 		}
 
-		if (array_key_exists('modified', $datahash))
-		{
+		if (array_key_exists('modified', $datahash)) {
 			$this->modified($datahash['modified']);
 		}
-		
-		if (array_key_exists('predecessorid', $datahash))
-		{
+
+		if (array_key_exists('predecessorid', $datahash)) {
 			$this->predecessorid($datahash['predecessorid']);
 		}
 
-		if (array_key_exists('sortindex', $datahash))
-		{
+		if (array_key_exists('sortindex', $datahash)) {
 			$this->sortindex($datahash['sortindex']);
 		}
-		
-		if (array_key_exists('payload', $datahash))
-		{
+
+		if (array_key_exists('payload', $datahash)) {
 			$this->payload($datahash['payload']);
 		}
 	}
 
 	function id($id = null)
 	{
-		if (!is_null($id))
-		{
+		if (!is_null($id)) {
 			$this->_wbo_hash['id'] = (string)$id;
 		}
-		return array_key_exists('id', $this->_wbo_hash) ?  $this->_wbo_hash['id'] : null;
+		return array_key_exists('id', $this->_wbo_hash) ? $this->_wbo_hash['id'] : null;
 	}
-	
+
 	function collection($collection = null)
 	{
-		if (!is_null($collection))
-		{
+		if (!is_null($collection)) {
 			$this->_collection = $collection;
 		}
 		return $this->_collection;
 	}
-	
+
 	function parentid($parentid = null)
 	{
-		if (!is_null($parentid))
-		{
+		if (!is_null($parentid)) {
 			$this->_wbo_hash['parentid'] = (string)$parentid;
 		}
-		return array_key_exists('parentid', $this->_wbo_hash) ?  $this->_wbo_hash['parentid'] : null;
+		return array_key_exists('parentid', $this->_wbo_hash) ? $this->_wbo_hash['parentid'] : null;
 	}
-	
+
 	function parentid_exists()
 	{
 		return array_key_exists('parentid', $this->_wbo_hash);
 	}
-	
+
 	function predecessorid($predecessorid = null)
 	{
-		if (!is_null($predecessorid))
-		{
+		if (!is_null($predecessorid)) {
 			$this->_wbo_hash['predecessorid'] = (string)$predecessorid;
 		}
-		return array_key_exists('predecessorid', $this->_wbo_hash) ?  $this->_wbo_hash['predecessorid'] : null;
+		return array_key_exists('predecessorid', $this->_wbo_hash) ? $this->_wbo_hash['predecessorid'] : null;
 	}
-	
+
 	function predecessorid_exists()
 	{
 		return array_key_exists('predecessorid', $this->_wbo_hash);
 	}
-	
+
 	function modified($modified = null)
 	{
-		if (!is_null($modified))
-		{
+		if (!is_null($modified)) {
 			$this->_wbo_hash['modified'] = round((float)$modified, 2);
 		}
-		return array_key_exists('modified', $this->_wbo_hash) ?  $this->_wbo_hash['modified'] : null;
+		return array_key_exists('modified', $this->_wbo_hash) ? $this->_wbo_hash['modified'] : null;
 	}
-	
+
 	function modified_exists()
 	{
 		return array_key_exists('modified', $this->_wbo_hash);
 	}
-	
+
 	function payload($payload = null)
 	{
-		if (!is_null($payload))
-		{
+		if (!is_null($payload)) {
 			$this->_wbo_hash['payload'] = $payload;
 		}
-		return array_key_exists('payload', $this->_wbo_hash) ?  $this->_wbo_hash['payload'] : null;
+		return array_key_exists('payload', $this->_wbo_hash) ? $this->_wbo_hash['payload'] : null;
 	}
-	
+
 	function payload_exists()
 	{
 		return array_key_exists('payload', $this->_wbo_hash);
@@ -205,71 +185,62 @@ class wbo
 	{
 		return mb_strlen($this->_wbo_hash['payload'], '8bit');
 	}
-	
+
 	function sortindex($index = null)
 	{
-		if (!is_null($index))
-		{
+		if (!is_null($index)) {
 			$this->_wbo_hash['sortindex'] = (int)($index);
 		}
-		return array_key_exists('sortindex', $this->_wbo_hash) ?  $this->_wbo_hash['sortindex'] : null;
+		return array_key_exists('sortindex', $this->_wbo_hash) ? $this->_wbo_hash['sortindex'] : null;
 	}
 
 	function sortindex_exists()
 	{
 		return array_key_exists('sortindex', $this->_wbo_hash);
 	}
-	
-		
+
+
 	function validate()
 	{
-		
-		if (!$this->id() || mb_strlen($this->id(), '8bit') > 64 || strpos($this->id(), '/') !== false)
-		{
+
+		if (!$this->id() || mb_strlen($this->id(), '8bit') > 64 || strpos($this->id(), '/') !== false) {
 			$this->_error[] = 'invalid id';
 		}
 
-		if ($this->parentid_exists() && mb_strlen($this->parentid(), '8bit') > 64)
-		{
+		if ($this->parentid_exists() && mb_strlen($this->parentid(), '8bit') > 64) {
 			$this->_error[] = 'invalid parentid';
 		}
 
-		if ($this->predecessorid_exists() && mb_strlen($this->predecessorid(), '8bit') > 64)
-		{
+		if ($this->predecessorid_exists() && mb_strlen($this->predecessorid(), '8bit') > 64) {
 			$this->_error[] = 'invalid predecessorid';
 		}
 
-		if (!is_numeric($this->modified()))
-		{
+		if (!is_numeric($this->modified())) {
 			$this->_error[] = 'invalid modified date';
 		}
-		
-		if (!$this->modified())
-		{
+
+		if (!$this->modified()) {
 			$this->_error[] = 'no modification date';
 		}
 
-		if (!$this->_collection || mb_strlen($this->_collection, '8bit') > 64)
-		{
+		if (!$this->_collection || mb_strlen($this->_collection, '8bit') > 64) {
 			$this->_error[] = 'invalid collection';
 		}
-		
-		if ($this->sortindex_exists() && 
-                    (!is_numeric($this->_wbo_hash['sortindex']) ||
-                     intval($this->sortindex()) > 999999999 ||
-                     intval($this->sortindex()) < -999999999 ))
-		{
+
+		if ($this->sortindex_exists() &&
+			(!is_numeric($this->_wbo_hash['sortindex']) ||
+				intval($this->sortindex()) > 999999999 ||
+				intval($this->sortindex()) < -999999999)
+		) {
 			$this->_error[] = 'invalid sortindex';
 		}
-		
-		if ($this->payload_exists())
-		{
-			if (!is_string($this->_wbo_hash['payload']))
-			{
+
+		if ($this->payload_exists()) {
+			if (!is_string($this->_wbo_hash['payload'])) {
 				$this->_error[] = 'payload needs to be json-encoded';
 			}
 		}
-		
+
 		return !$this->get_error();
 	}
 
@@ -277,17 +248,17 @@ class wbo
 	{
 		return $this->_error;
 	}
-	
+
 	function clear_error()
 	{
 		$this->_error = array();
 	}
-	
+
 	function raw_hash()
 	{
 		return $this->_wbo_hash;
 	}
-	
+
 	function json()
 	{
 		return json_encode($this->_wbo_hash);
