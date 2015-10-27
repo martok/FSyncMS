@@ -113,12 +113,9 @@ function check_input($data)
 */
 function write_config_file($db_type, $db_host, $db_name, $db_user, $db_pass, $fsRoot, $db_table_prefix)
 {
-
 	// construct the name of config file
-	$path = explode('/', $_SERVER['SCRIPT_FILENAME']);
-	array_pop($path);
-	array_push($path, 'settings.php');
-	$cfg_file_name = implode('/', $path);
+	$cfg_file_name = implode(DIRECTORY_SEPARATOR, array(__DIR__, 'conf', 'settings.php'));
+	$def_log_file = implode(DIRECTORY_SEPARATOR, array(__DIR__, 'log', 'fsyncms.log'));
 
 	if (file_exists($cfg_file_name) && filesize($cfg_file_name) > 0) {
 		echo '<h2>The configuration file "' . $cfg_file_name . '" is already present!</h2>';
@@ -128,37 +125,40 @@ function write_config_file($db_type, $db_host, $db_name, $db_user, $db_pass, $fs
 	echo 'Creating configuration file...<br/>';
 
 	// create content
-	$cfg_content = "<?php\n\n";
-	$cfg_content .= "    // you can disable registration to the firefox sync server here,\n";
-	$cfg_content .= "    // by setting ENABLE_REGISTER to false\n";
-	$cfg_content .= "    // \n";
-	$cfg_content .= "    define(\"ENABLE_REGISTER\", true);\n\n";
+	$cfg_content = <<<CFG
+<?php
+// you can disable registration to the firefox sync server here
+// by setting ENABLE_REGISTER to false
+define("ENABLE_REGISTER", true);
 
-	$cfg_content .= "    // enable / disable error logging\n";
-	$cfg_content .= "    define(\"LOG_THE_ERROR\", true);\n\n";
+// enable / disable error logging
+define("LOG_THE_ERROR", true);
 
-	$cfg_content .= "    // firefox sync server url, this should end with a /\n";
-	$cfg_content .= "    // e.g. https://YourDomain.de/Folder_und_ggf_/index.php/\n";
-	$cfg_content .= "    // \n";
-	$cfg_content .= "    define(\"FSYNCMS_ROOT\", \"" . $fsRoot . "\");\n\n";
+// log file location
+define("LOG_FILE_NAME", "$def_log_file");
 
-	$cfg_content .= "    // database system you want to use\n";
-	$cfg_content .= "    // e.g. MYSQL, PGSQL, SQLITE\n";
-	$cfg_content .= "    // \n";
-	$cfg_content .= "    define(\"DATABASE_ENGINE\", \"" . strtoupper($db_type) . "\");\n";
-	$cfg_content .= "    \n";
-	$cfg_content .= "    define(\"DATABASE_HOST\", \"" . $db_host . "\");\n";
-	$cfg_content .= "    define(\"DATABASE_DB\", \"" . $db_name . "\");\n";
-	$cfg_content .= "    define(\"DATABASE_USER\", \"" . $db_user . "\");\n";
-	$cfg_content .= "    define(\"DATABASE_PASSWORD\", \"" . $db_pass . "\");\n";
-	$cfg_content .= "    \n";
-	$cfg_content .= "    define(\"DATABASE_TABLE_PREFIX\", \"" . $db_table_prefix . "\");\n";
-	$cfg_content .= "\n";
-	$cfg_content .= "    // Use bcrypt instead of MD5 for password hashing\n";
-	$cfg_content .= "    define(\"BCRYPT\", true);\n";
-	$cfg_content .= "    define(\"BCRYPT_ROUNDS\", 12);\n";
+// firefox sync server url, this should end with a /
+// e.g. https://YourDomain.de/Folder_und_ggf_/index.php/
+//
+define("FSYNCMS_ROOT", "$fsRoot");
 
-	$cfg_content .= "\n?>\n";
+// database system you want to use
+// e.g. MYSQL, PGSQL, SQLITE
+//
+define("DATABASE_ENGINE", "{strtoupper($db_type)}");
+
+define("DATABASE_HOST", "{$db_host}");
+define("DATABASE_DB", "{$db_name}");
+define("DATABASE_USER", "{$db_user}");
+define("DATABASE_PASSWORD", "{$db_pass}");
+
+define("DATABASE_TABLE_PREFIX", "{$db_table_prefix}");
+
+// Use bcrypt instead of MD5 for password hashing
+define("BCRYPT", true);
+define("BCRYPT_ROUNDS", 12);
+?>
+CFG;
 
 	// write to disk
 	// @note: catch does not seem to work

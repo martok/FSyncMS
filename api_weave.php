@@ -42,8 +42,6 @@ if (!defined('INDEX_INCLUDE')) //file should only be used in context of index.ph
 	report_problem('Function not found', 404);
 }
 
-require_once 'settings.php';
-
 $username = array_shift($requestParts);
 
 if (!validate_username($username)) {

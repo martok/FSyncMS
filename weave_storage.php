@@ -43,7 +43,6 @@
 
 require_once 'weave_basic_object.php';
 require_once 'weave_utils.php';
-require_once 'settings.php';
 
 class WeaveStorage
 {

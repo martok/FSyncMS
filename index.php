@@ -40,11 +40,13 @@
 #
 # ***** END LICENSE BLOCK *****
 
-if (!file_exists('settings.php') && file_exists('setup.php')) {
+define('SETTINGS_FILE', __DIR__ . '/conf/settings.php');
+
+if (!file_exists(SETTINGS_FILE) && file_exists('setup.php')) {
 	require_once 'setup.php';
 	exit;
 
-} else if (!file_exists('settings.php')) {
+} else if (!file_exists(SETTINGS_FILE)) {
 	echo '<hr><h2>Maybe the setup is not completed, missing settings.php!</h2><hr>';
 	exit;
 
@@ -52,6 +54,8 @@ if (!file_exists('settings.php') && file_exists('setup.php')) {
 	echo '<hr><h2>Maybe the setup is not completed, else please delete setup.php!</h2><hr>';
 	exit;
 }
+
+require_once SETTINGS_FILE;
 
 require_once 'weave_storage.php';
 require_once 'weave_basic_object.php';
