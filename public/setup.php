@@ -40,6 +40,8 @@
 # 
 # ***** END LICENSE BLOCK *****
 
+require_once 'site_utils.php';
+
 // --------------------------------------------
 // variables start
 // --------------------------------------------
@@ -114,8 +116,8 @@ function check_input($data)
 function write_config_file($db_type, $db_host, $db_name, $db_user, $db_pass, $fsRoot, $db_table_prefix)
 {
 	// construct the name of config file
-	$cfg_file_name = implode(DIRECTORY_SEPARATOR, array(__DIR__, 'conf', 'settings.php'));
-	$def_log_file = implode(DIRECTORY_SEPARATOR, array(__DIR__, 'log', 'fsyncms.log'));
+	$cfg_file_name = FSYNCMS_CONFIG;
+	$def_log_file = implode(DIRECTORY_SEPARATOR, array(FSYNCMS_ROOT, 'log', 'fsyncms.log'));
 
 	if (file_exists($cfg_file_name) && filesize($cfg_file_name) > 0) {
 		echo '<h2>The configuration file "' . $cfg_file_name . '" is already present!</h2>';
@@ -211,7 +213,7 @@ function echo_footer()
 
 
 // check if we have no configuration at the moment
-if (file_exists('settings.php') && filesize('settings.php') > 0) {
+if (file_exists(FSYNCMS_CONFIG) && filesize(FSYNCMS_CONFIG) > 0) {
 	echo '<hr><h2>The setup looks completed, please finish it by deleting setup.php!</h2><hr>';
 	exit;
 }

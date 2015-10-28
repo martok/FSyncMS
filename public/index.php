@@ -40,13 +40,13 @@
 #
 # ***** END LICENSE BLOCK *****
 
-define('SETTINGS_FILE', __DIR__ . '/conf/settings.php');
+require_once 'site_utils.php';
 
-if (!file_exists(SETTINGS_FILE) && file_exists('setup.php')) {
+if (!file_exists(FSYNCMS_CONFIG) && file_exists('setup.php')) {
 	require_once 'setup.php';
 	exit;
 
-} else if (!file_exists(SETTINGS_FILE)) {
+} else if (!file_exists(FSYNCMS_CONFIG)) {
 	echo '<hr><h2>Maybe the setup is not completed, missing settings.php!</h2><hr>';
 	exit;
 
@@ -55,7 +55,7 @@ if (!file_exists(SETTINGS_FILE) && file_exists('setup.php')) {
 	exit;
 }
 
-require_once SETTINGS_FILE;
+require_once FSYNCMS_CONFIG;
 
 require_once 'weave_storage.php';
 require_once 'weave_basic_object.php';
