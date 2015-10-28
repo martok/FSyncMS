@@ -165,7 +165,7 @@ switch ($version) {
 					// modification to support iPhone/iPod Touch devices
 					// check http://www.rfkd.de/?p=974 for further details
 					$node = get_https() ? 'https://' : 'http://';
-					$node.= parse_url(FSYNCMS_ROOT, PHP_URL_HOST) . parse_url(FSYNCMS_ROOT, PHP_URL_PATH);
+					$node.= parse_url(FSYNCMS_URL, PHP_URL_HOST) . parse_url(FSYNCMS_URL, PHP_URL_PATH);
 					header('Content-Type: text/plain', true);
 					exit($node);
 				}

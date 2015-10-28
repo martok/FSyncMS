@@ -117,7 +117,9 @@ function write_config_file($db_type, $db_host, $db_name, $db_user, $db_pass, $fs
 {
 	// construct the name of config file
 	$cfg_file_name = FSYNCMS_CONFIG;
+
 	$def_log_file = implode(DIRECTORY_SEPARATOR, array(FSYNCMS_ROOT, 'log', 'fsyncms.log'));
+	$db_type_upper = strtoupper($db_type);
 
 	if (file_exists($cfg_file_name) && filesize($cfg_file_name) > 0) {
 		echo '<h2>The configuration file "' . $cfg_file_name . '" is already present!</h2>';
@@ -137,17 +139,17 @@ define("ENABLE_REGISTER", true);
 define("LOG_THE_ERROR", true);
 
 // log file location
-define("LOG_FILE_NAME", "$def_log_file");
+define("LOG_FILE_NAME", "{$def_log_file}");
 
 // firefox sync server url, this should end with a /
 // e.g. https://YourDomain.de/Folder_und_ggf_/index.php/
 //
-define("FSYNCMS_ROOT", "$fsRoot");
+define("FSYNCMS_URL", "{$fsRoot}");
 
 // database system you want to use
 // e.g. MYSQL, PGSQL, SQLITE
 //
-define("DATABASE_ENGINE", "{strtoupper($db_type)}");
+define("DATABASE_ENGINE", "{$db_type_upper}");
 
 define("DATABASE_HOST", "{$db_host}");
 define("DATABASE_DB", "{$db_name}");

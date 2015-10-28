@@ -63,7 +63,7 @@ If you want to create it by your own, just generate the settings.php with the fo
         // firefox sync server
         // this should end with a /
         //
-        define("FSYNCMS_ROOT","https://DOMAIN.de/Folder_und_ggf_/index.php/");
+        define("FSYNCMS_URL","https://DOMAIN.de/Folder_und_ggf_/index.php/");
 
         //MYSQL Params
         define("MYSQL_ENABLE", false);

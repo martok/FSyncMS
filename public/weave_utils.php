@@ -101,7 +101,7 @@ function get_path()
 		// but that doesent mean that it does work... well it works for me
 		// and it shouldnt break anything...
 		$path = $_SERVER['REQUEST_URI'];
-		$lastfolder = substr(FSYNCMS_ROOT, strrpos(FSYNCMS_ROOT, '/', -2));
+		$lastfolder = substr(FSYNCMS_URL, strrpos(FSYNCMS_URL, '/', -2));
 		$path = substr($path, (strpos($path, $lastfolder) + strlen($lastfolder) - 1)); //chop the lead slash
 		if (strpos($path, '?') != false) {
 			$path = substr($path, 0, strpos($path, '?')); //remove php arguments
