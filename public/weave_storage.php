@@ -551,7 +551,7 @@ class WeaveStorage
 		}
 
 		if ($limit) {
-			$select_stmt .= ' LIMIT' . intval($limit);
+			$select_stmt .= ' LIMIT ' . intval($limit);
 			if ($offset) {
 				$select_stmt .= ' OFFSET ' . intval($offset);
 			}
