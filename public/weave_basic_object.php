@@ -203,7 +203,7 @@ class wbo
 	function validate()
 	{
 
-		if (!$this->id() || mb_strlen($this->id(), '8bit') > 64 || strpos($this->id(), '/') !== false) {
+		if (!$this->id() || mb_strlen($this->id(), '8bit') > 64) {
 			$this->_error[] = 'invalid id';
 		}
 
