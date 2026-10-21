@@ -238,18 +238,28 @@ class WeaveStorage
 	function create_object(&$wbo)
 	{
 		try {
+			$pUser = $this->_username;
+			$pId = $wbo->id();
+			$pColl= $wbo->collection();
+			$pParent = $wbo->parentid();
+			$pPred = $wbo->predecessorid();
+			$pIndex = $wbo->sortindex();
+			$pMod = $wbo->modified();
+			$pPayload = $wbo->payload();
+			$pSize = $wbo->payload_size();
+
 			$insert_stmt = 'INSERT INTO ' . $this->_wbo_table . ' (username, id, collection, parentid, predecessorid, sortindex, modified, payload, payload_size)
 		            VALUES (:username, :id, :collection, :parentid, :predecessorid, :sortindex, :modified, :payload, :payload_size)';
 			$sth = $this->_dbh->prepare($insert_stmt);
-			$sth->bindParam(':username', $this->_username);
-			$sth->bindParam(':id', $wbo->id());
-			$sth->bindParam(':collection', $wbo->collection());
-			$sth->bindParam(':parentid', $wbo->parentid());
-			$sth->bindParam(':predecessorid', $wbo->predecessorid());
-			$sth->bindParam(':sortindex', $wbo->sortindex());
-			$sth->bindParam(':modified', $wbo->modified());
-			$sth->bindParam(':payload', $wbo->payload());
-			$sth->bindParam(':payload_size', $wbo->payload_size());
+			$sth->bindParam(':username', $pUser);
+			$sth->bindParam(':id', $pId);
+			$sth->bindParam(':collection', $pColl);
+			$sth->bindParam(':parentid', $pParent);
+			$sth->bindParam(':predecessorid', $pPred);
+			$sth->bindParam(':sortindex', $pIndex);
+			$sth->bindParam(':modified', $pMod);
+			$sth->bindParam(':payload', $pPayload);
+			$sth->bindParam(':payload_size', $pSize);
 			$sth->execute();
 		} catch (PDOException $exception) {
 			error_log('create_object: ' . $exception->getMessage());
@@ -332,7 +342,7 @@ class WeaveStorage
 			return 0;
 		}
 
-		$update_stmt .= join($update_list, ',');
+		$update_stmt .= implode(',', $update_list);
 
 		$update_stmt .= ' WHERE username = ? AND collection = ? AND id = ?';
 		$params[] = $this->_username;
@@ -575,7 +585,7 @@ class WeaveStorage
 				$wbo->populate($result);
 				$ids[] = $wbo;
 			} else {
-				$ids[] = $result{'id'};
+				$ids[] = $result['id'];
 			}
 		}
 		return $ids;

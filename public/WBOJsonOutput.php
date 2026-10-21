@@ -103,7 +103,7 @@ class WBOJsonOutput
 				$wbo->populate($result);
 				echo $wbo->json();
 			} else {
-				echo json_encode($result{'id'});
+				echo json_encode($result['id']);
 			}
 		}
 
@@ -119,7 +119,7 @@ class WBOJsonOutput
 				$wbo->populate($result);
 				$output = $wbo->json();
 			} else {
-				$output = json_encode($result{'id'});
+				$output = json_encode($result['id']);
 			}
 			echo pack('N', mb_strlen($output, '8bit')) . $output;
 		}
@@ -134,7 +134,7 @@ class WBOJsonOutput
 				$wbo->populate($result);
 				echo preg_replace('/\n/', '\u000a', $wbo->json());
 			} else {
-				echo json_encode($result{'id'});
+				echo json_encode($result['id']);
 			}
 			echo "\n";
 		}

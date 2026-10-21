@@ -68,7 +68,7 @@ function report_problem($message, $code = 503)
 		'404' => '404 Not Found',
 		'412' => '412 Precondition Failed',
 		'503' => '503 Service Unavailable');
-	header('HTTP/1.1 ' . $headers{$code}, true, $code);
+	header('HTTP/1.1 ' . $headers[$code], true, $code);
 
 	if ($code == 401) {
 		header('WWW-Authenticate: Basic realm="Weave"');
